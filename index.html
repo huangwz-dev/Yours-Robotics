@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleet Ops Console</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    header p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+    
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 60vh;
+      font-size: 1.2rem;
+      color: #666;
+    }
+    
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 1rem 2rem;
+      margin: 1rem;
+      border-radius: 4px;
+      border-left: 4px solid #c33;
+    }
+    
+    .dashboard {
+      padding: 1rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    @media (min-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+    
+    .panel {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .panel h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+    
+    .panel h3 {
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      color: #555;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    
+    .metric-label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+    
+    .metric-value {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    
+    .robot-list {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .robot-item {
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafafa;
+    }
+    
+    .robot-item:hover {
+      background: #f0f0f0;
+      border-color: #667eea;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    }
+    
+    .robot-item.critical {
+      border-color: #ff6b6b;
+      background: #ffe5e5;
+    }
+    
+    .robot-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .robot-id {
+      font-size: 1.1rem;
+      color: #333;
+    }
+    
+    .robot-model {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .robot-state {
+      font-size: 0.8rem;
+      background: #667eea;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+    }
+    
+    .robot-metrics {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .alert {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    
+    .alert-warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      color: #856404;
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #999;
+    }
+    
+    .close-btn:hover {
+      color: #333;
+    }
+    
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .detail-item {
+      padding: 1rem;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+    
+    .detail-item label {
+      display: block;
+      font-size: 0.85rem;
+      color: #999;
+      margin-bottom: 0.5rem;
+    }
+    
+    .detail-item span {
+      display: block;
+      font-size: 1.1rem;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .drilldown-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    
+    .metric-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    
+    .metric-box .metric-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-top: 0.5rem;
+    }
+    
+    .definition-item {
+      padding: 1rem;
+      background: #f9f9f9;
+      border-left: 3px solid #667eea;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+    }
+    
+    .definition-item strong {
+      color: #333;
+    }
+    
+    .definition-item p {
+      color: #666;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+    
+    .anomaly-list {
+      background: #fffacd;
+      border: 1px solid #ffd700;
+      border-radius: 4px;
+      padding: 1rem;
+    }
+    
+    .anomaly-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .anomaly-item:last-child {
+      border-bottom: none;
+    }
+    
+    .anomaly-item strong {
+      color: #d97706;
+    }
+    
+    .record-counts ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .record-counts li {
+      padding: 0.75rem;
+      background: #f9f9f9;
+      border-radius: 4px;
+      color: #666;
+      font-size: 0.95rem;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚙️ Fleet Operations Console</h1>
+    <p>Yours Robotics - Punggol Digital District</p>
+  </header>
+
+  <div id="loading" class="loading">Loading fleet data...</div>
+  <div id="error" class="error hidden"></div>
+  <div id="dashboard" class="dashboard hidden">
+    <div class="dashboard-grid">
+      <div id="fleet-overview" class="panel"></div>
+      <div id="right-panel" class="panel"></div>
+    </div>
+  </div>
+
+  <script>
+    async function loadDashboard() {
+      try {
+        const response = await fetch('http://localhost:5000/api/dashboard');
+        if (!response.ok) throw new Error('Failed to fetch dashboard data');
+        const data = await response.json();
+        
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        
+        renderDashboard(data);
+      } catch (error) {
+        document.getElementById('loading').classList.add('hidden');
+        const errorEl = document.getElementById('error');
+        errorEl.textContent = `Error: ${error.message}`;
+        errorEl.classList.remove('hidden');
+      }
+    }
+    
+    function renderDashboard(data) {
+      const { summary, robots, dataQuality, rawMetrics } = data;
+      
+      // Fleet Overview
+      const fleetOverview = document.getElementById('fleet-overview');
+      const criticalRobots = robots.filter(r => parseFloat(r.availability) < 50);
+      
+      fleetOverview.innerHTML = `
+        <h2>Fleet Overview</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Total Robots</div>
+            <div class="metric-value">${summary.totalRobots}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Active Robots</div>
+            <div class="metric-value">${summary.activeRobots}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">QR Conversion Rate</div>
+            <div class="metric-value">${(parseFloat(summary.conversionRate) * 100).toFixed(1)}%</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Vending Revenue</div>
+            <div class="metric-value">SGD ${summary.vendingRevenue}</div>
+          </div>
+        </div>
+        <h3>Robot Status</h3>
+        ${criticalRobots.length > 0 ? `<div class="alert alert-warning">⚠️ ${criticalRobots.length} robot(s) have low availability (&lt;50%)</div>` : ''}
+        <div class="robot-list">
+          ${robots.map(robot => `
+            <div class="robot-item ${parseFloat(robot.availability) < 50 ? 'critical' : ''}" onclick="showRobotDetails(${JSON.stringify(robot).replace(/"/g, '&quot;')})">
+              <div class="robot-header">
+                <span class="robot-id">${robot.id}</span>
+                <span class="robot-model">(${robot.model})</span>
+                <span class="robot-state">${robot.lastKnownState}</span>
+              </div>
+              <div class="robot-metrics">
+                <span>Availability: ${robot.availability}%</span>
+                <span>Revenue: SGD ${robot.vendingRevenue}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      // Data Quality Panel
+      const rightPanel = document.getElementById('right-panel');
+      rightPanel.innerHTML = `
+        <h2>Data Quality & Definitions</h2>
+        <div class="definitions">
+          <h3>Metric Definitions</h3>
+          ${Object.entries(rawMetrics.definitions || {}).map(([key, def]) => `
+            <div class="definition-item">
+              <strong>${key}:</strong>
+              <p>${def}</p>
+            </div>
+          `).join('')}
+        </div>
+        <div class="anomalies">
+          <h3>Detected Anomalies</h3>
+          ${dataQuality.anomalies.length === 0 ? '<p>No significant anomalies detected.</p>' : `
+            <div class="anomaly-list">
+              ${dataQuality.anomalies.map(anomaly => `
+                <div class="anomaly-item">
+                  <strong>${anomaly.type}</strong>
+                  <p><em>Entity:</em> ${anomaly.entity}</p>
+                  <p>${anomaly.note}</p>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+        <div class="record-counts">
+          <h3>Data Summary</h3>
+          <ul>
+            <li>Total Robots: ${dataQuality.totalRecords.robots}</li>
+            <li>Telemetry Records: ${dataQuality.totalRecords.telemetry}</li>
+            <li>Interactions: ${dataQuality.totalRecords.interactions}</li>
+            <li>Navigation Events: ${dataQuality.totalRecords.navEvents}</li>
+            <li>Vending Transactions: ${dataQuality.totalRecords.vending}</li>
+            <li>Footfall Readings: ${dataQuality.totalRecords.footfall}</li>
+          </ul>
+        </div>
+      `;
+      
+      window.dashboardData = data;
+    }
+    
+    function showRobotDetails(robot) {
+      const rightPanel = document.getElementById('right-panel');
+      rightPanel.innerHTML = `
+        <div class="panel-header">
+          <h2>${robot.id} - ${robot.model}</h2>
+          <button class="close-btn" onclick="location.reload()">✕</button>
+        </div>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Home Zone</label>
+            <span>${robot.homeZone}</span>
+          </div>
+          <div class="detail-item">
+            <label>Deploy Date</label>
+            <span>${robot.deployDate}</span>
+          </div>
+          <div class="detail-item">
+            <label>Availability</label>
+            <span>${robot.availability}%</span>
+          </div>
+          <div class="detail-item">
+            <label>Last Known State</label>
+            <span>${robot.lastKnownState}</span>
+          </div>
+        </div>
+        <div class="drilldown-metrics">
+          <div class="metric-box">
+            <div class="metric-label">Interactions</div>
+            <div class="metric-value">${robot.interactionCount}</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Vending Revenue</div>
+            <div class="metric-value">SGD ${robot.vendingRevenue}</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Navigation Events</div>
+            <div class="metric-value">${robot.navigationEventsCount}</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Faults Detected</div>
+            <div class="metric-value">${robot.faultCount}</div>
+          </div>
+        </div>
+      `;
+    }
+    
+    loadDashboard();
+  </script>
+</body>
+</html>
