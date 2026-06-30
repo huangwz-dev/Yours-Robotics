@@ -1,0 +1,11 @@
+robot_id,model,home_zone,deploy_date,firmware_version
+R-01,YR-Atlas,PDD-A,2026-06-01,2.3.9
+R-02,YR-Nova,PDD-A,2026-06-01,2.4.1
+R-03,YR-Atlas,PDD-B,2026-06-01,2.4.1
+R-04,YR-Nova,PDD-B,2026-06-01,2.3.9
+R-05,YR-Atlas,PDD-C,2026-06-01,2.4.1
+R-06,YR-Nova,PDD-C,2026-06-01,2.4.1
+R-07,YR-Atlas,PDD-D,2026-06-01,2.3.9
+R-08,YR-Nova,PDD-A,2026-06-01,2.4.1
+R-09,YR-Atlas,PDD-B,2026-06-01,2.4.1
+R-10,YR-Nova,PDD-C,2026-06-01,2.3.9
