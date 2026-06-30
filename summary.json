@@ -1,0 +1,43 @@
+{
+  "fleet": {
+    "total_robots": 10,
+    "active_robots": 10
+  },
+  "vending": {
+    "total_revenue_sgd": 55285.0,
+    "transactions_counted": 991
+  },
+  "qr": {
+    "total_scans": 1257,
+    "conversions": 413,
+    "conversion_rate": 0.3286
+  },
+  "metric_definitions": {
+    "availability": "Percentage of the 14 pilot days (Jun 1-14) on which a robot produced at least one telemetry reading.",
+    "active_robots": "Registered robots (present in robots.csv) that produced at least one telemetry reading during the pilot window."
+  },
+  "data_quality": {
+    "anomalies": [
+      {
+        "type": "zone_name_inconsistency",
+        "entity": "footfall.csv",
+        "note": "50 rows use 'PDD_A' (underscore) instead of 'PDD-A' (dash); normalised underscores to dashes before aggregating footfall by zone."
+      },
+      {
+        "type": "missing_field",
+        "entity": "nav_events.csv",
+        "note": "25 navigation events have a blank severity field; left as-is and treated as non-fault (only severity='warn' counts as a fault)."
+      },
+      {
+        "type": "unregistered_robot",
+        "entity": "R-99",
+        "note": "R-99 appears in telemetry.csv but is not in robots.csv; excluded from fleet totals so active_robots does not exceed total_robots."
+      },
+      {
+        "type": "case_inconsistency",
+        "entity": "telemetry.csv",
+        "note": "The state column mixes cases (e.g. 'charging' vs 'CHARGING'); lower-cased all states before computing per-state metrics."
+      }
+    ]
+  }
+}
